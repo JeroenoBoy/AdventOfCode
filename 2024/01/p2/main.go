@@ -42,30 +42,11 @@ func main() {
 		bArray[b] = bArray[b] + 1
 	}
 
-    result := 0
+	result := 0
 
-    for i := range len(aArray) {
-        result += i * aArray[i] * bArray[i]
-    }
+	for i := range len(aArray) {
+		result += i * aArray[i] * bArray[i]
+	}
 
 	log.Println(result)
-}
-
-func catch(arr []int, indx *int, to int) {
-	for *indx < len(arr) && arr[*indx] < to {
-		*indx++
-	}
-}
-
-func count(arr []int, indx *int, target int) int {
-	if arr[*indx] != target {
-		return 0
-	}
-	i := 1
-
-	for *indx < len(arr)-1 && arr[*indx+1] == target {
-		*indx++
-	}
-
-	return i
 }
