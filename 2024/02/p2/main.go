@@ -20,46 +20,69 @@ func main() {
 			continue
 		}
 
-		lStr := strings.Split(report, " ")
+		r := strings.Split(report, " ")
+		allReports := make([][]int, len(r)+1)
+		allReports[0] = make([]int, len(r))
 
-		levels := make([]int, len(lStr))
-		t := 0
-		for i, s := range lStr {
-			c, _ := strconv.Atoi(s)
-			levels[i] = c
+		for i, v := range r {
+			allReports[0][i], err = strconv.Atoi(v)
+			if err != nil {
+				panic(err)
+			}
+		}
 
-			if i == 0 {
+		for i := 1; i < len(allReports); i++ {
+			allReports[i] = make([]int, len(allReports[0])-1)
+			toSkip := i - 1
+			for j := 0; j < len(allReports[i])-1; j++ {
+				d := j
+				if j >= toSkip {
+					d++
+				}
+
+				allReports[i][j] = allReports[0][d]
+			}
+		}
+
+		for _, levels := range allReports {
+			a := levels[0]
+			b := levels[1]
+
+			v := b
+			dir := sign(b - a)
+
+			if dir == 0 {
 				continue
 			}
 
-			t += sign(c - levels[i-1])
-		}
-
-		if t == 0 {
-			continue
-		}
-
-		dir := sign(t)
-		p := levels[0]
-
-		m := 0
-
-		for i := 1; i < len(levels); i++ {
-			c := levels[i]
-			d := c - p
-			s := sign(d)
-
-			if d == 0 || s != dir || math.Abs(float64(d)) > 3 {
-				m++
+			if math.Abs(float64(b-a)) > 3 {
 				continue
 			}
 
-			p = c
-		}
-
-		if m < 2 {
 			saveReports++
+			for i := 2; i < len(levels); i++ {
+				c := levels[i]
+				d := c - v
+				if math.Abs(float64(d)) > 3 {
+					break
+				}
+				s := sign(d)
+				if s == 0 {
+					break
+				}
+				if s == dir {
+					v = c
+					goto valid
+				}
+
+				break
+			}
+			goto invalid
 		}
+	invalid:
+		continue
+	valid:
+		saveReports++
 	}
 
 	println(saveReports)
