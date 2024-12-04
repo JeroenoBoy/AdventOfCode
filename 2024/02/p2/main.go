@@ -15,7 +15,7 @@ func main() {
 	}
 
 	saveReports := 0
-	for _, report := range strings.Split(string(inputs), "\n") {
+	for i, report := range strings.Split(string(inputs), "\n") {
 		if len(strings.Trim(report, " ")) == 0 {
 			continue
 		}
@@ -34,7 +34,7 @@ func main() {
 		for i := 1; i < len(allReports); i++ {
 			allReports[i] = make([]int, len(allReports[0])-1)
 			toSkip := i - 1
-			for j := 0; j < len(allReports[i])-1; j++ {
+			for j := 0; j < len(allReports[i]); j++ {
 				d := j
 				if j >= toSkip {
 					d++
@@ -45,41 +45,36 @@ func main() {
 		}
 
 		for _, levels := range allReports {
+			if i == 54 {
+				s := ""
+				for _, n := range levels {
+					s += strconv.Itoa(n) + " "
+				}
+			}
+
 			a := levels[0]
 			b := levels[1]
 
 			v := b
 			dir := sign(b - a)
 
-			if dir == 0 {
+			if dir == 0 || math.Abs(float64(b-a)) > 3 {
 				continue
 			}
 
-			if math.Abs(float64(b-a)) > 3 {
-				continue
-			}
-
-			saveReports++
 			for i := 2; i < len(levels); i++ {
 				c := levels[i]
 				d := c - v
-				if math.Abs(float64(d)) > 3 {
-					break
-				}
 				s := sign(d)
-				if s == 0 {
-					break
+				if s != dir || math.Abs(float64(d)) > 3 {
+					goto invalid
 				}
-				if s == dir {
-					v = c
-					goto valid
-				}
-
-				break
+				v = c
 			}
-			goto invalid
+			goto valid
+		invalid:
+			continue
 		}
-	invalid:
 		continue
 	valid:
 		saveReports++
