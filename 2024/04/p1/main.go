@@ -25,8 +25,6 @@ func main() {
 				continue
 			}
 
-			println(i, j)
-
 			compareDiagonal(lines, 0, 1, i, j, &matches)
 			compareDiagonal(lines, 0, -1, i, j, &matches)
 			compareDiagonal(lines, 1, 0, i, j, &matches)
