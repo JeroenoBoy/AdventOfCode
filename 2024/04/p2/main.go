@@ -17,7 +17,6 @@ func main() {
 
 	matches := 0
 	for y := 1; y < len(lines)-2; y++ { // Again I don't know why I need 1 more than the other but it works so idc
-		println("l", y, lines[y])
 		for x := 1; x < utf8.RuneCountInString(lines[y])-1; x++ {
 			if lines[y][x] != 'A' {
 				continue
