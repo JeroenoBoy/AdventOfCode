@@ -42,32 +42,6 @@ func main() {
 	println(matches)
 }
 
-func compareHorizontal(lines []string, row, col int, matchCount *int) {
-	if col <= utf8.RuneCountInString(lines[row])-runeCount {
-		*matchCount++
-		for i := 1; i < len(runeList); i++ {
-			if lines[row][col+i] == runeList[i] {
-				continue
-			}
-
-			*matchCount--
-			break
-		}
-	}
-
-	if col >= runeCount {
-		*matchCount++
-		for i := 1; i < len(runeList); i++ {
-			if lines[row][col-i] == runeList[i] {
-				continue
-			}
-			*matchCount--
-			break
-		}
-	}
-
-}
-
 func compareDiagonal(lines []string, dirV, dirH, row, col int, matchCount *int) {
 	rowLen := len(lines)
 	colLen := utf8.RuneCountInString(lines[row])
