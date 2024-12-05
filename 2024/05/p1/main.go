@@ -49,7 +49,6 @@ func main() {
 
 	total := 0
 	for pI := 0; pI < len(pages); pI++ {
-		println("testing", pI)
 		page := pages[pI]
 		i := len(page) - 1
 
