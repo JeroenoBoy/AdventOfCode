@@ -146,15 +146,17 @@ func isLoopable(lastObstacles []vector, obstacles []bool, xL int, dir direction)
 	firstPos := lastObstacles[2]
 
 	var targetPos vector
+
 	targetPos = targetPos.add(vector(dir.rotateReverse()).multiply(lastPos.dot(dir.rotateReverse())))
 	targetPos = targetPos.add(vector(dir).multiply(firstPos.dot(dir)))
 
-    targetObtacle := targetPos.add(vector(dir.rotate()))
-    if obstacles[targetObtacle.Y*xL+targetObtacle.X] {
-        return false
-    }
-
 	fmt.Println("dir=", dir, "tp=", targetPos, "fp=", firstPos, "mp=", midPos, "lp=", lastPos)
+
+	targetObtacle := targetPos.add(vector(dir.rotate()))
+	if obstacles[targetObtacle.Y*xL+targetObtacle.X] {
+		fmt.Println("Aleardy an obstacle at ", targetObtacle)
+		return false
+	}
 
 	difA := lastPos.minus(targetPos)
 	difB := firstPos.minus(targetPos)
