@@ -37,9 +37,6 @@ func main() {
 
 func hasValidOption(nums []int, i int, currentValue int, expectedResult int) bool {
 	if i == len(nums) {
-		if currentValue == expectedResult {
-			println(currentValue, expectedResult)
-		}
 		return currentValue == expectedResult
 	}
 

@@ -37,9 +37,6 @@ func main() {
 
 func hasValidOption(nums []int, i int, currentValue int, expectedResult int) bool {
 	if i == len(nums) {
-		if currentValue == expectedResult {
-			println(currentValue, expectedResult)
-		}
 		return currentValue == expectedResult
 	}
 
@@ -51,7 +48,7 @@ func hasValidOption(nums []int, i int, currentValue int, expectedResult int) boo
 		return true
 	}
 
-    v, _ := strconv.Atoi(strconv.Itoa(currentValue)+strconv.Itoa(nums[i]))
+	v, _ := strconv.Atoi(strconv.Itoa(currentValue) + strconv.Itoa(nums[i]))
 	if hasValidOption(nums, i+1, v, expectedResult) {
 		return true
 	}
