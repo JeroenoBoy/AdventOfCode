@@ -48,12 +48,11 @@ func main() {
 			for mem[maxI] == -1 {
 				maxI--
 			}
-            if i >= maxI {
-                break
-            }
+			if i >= maxI {
+				break
+			}
 			sum += i * mem[maxI]
 		} else {
-            println(i, mem[i])
 			sum += i * mem[i]
 		}
 	}
