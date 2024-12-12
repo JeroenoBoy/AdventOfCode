@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"io/ioutil"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -10,8 +11,10 @@ import (
 )
 
 var (
-	fileInput  = flag.String("i", "input.txt", "change the input file")
-	iterations = flag.Int("c", 25, "the count of iterations")
+	fileInput         = flag.String("i", "input.txt", "change the input file")
+	iterations        = flag.Int("c", 75, "the count of iterations")
+	routineCount      = flag.Int("r", 100, "the count of routines to run")
+	routineStartDepth = flag.Int("d", 25, "the depht when the multi threading starts")
 )
 
 func main() {
@@ -23,32 +26,60 @@ func main() {
 
 	s := strings.Split(strings.ReplaceAll(string(input), "\n", ""), " ")
 
-	wg := sync.WaitGroup{}
-	mtx := sync.Mutex{}
-	count := 0
-
-	var spawn func(string, int)
-
-	spawn = func(num string, iteration int) {
-		wg.Add(1)
-		mtx.Lock()
-		count++
-		mtx.Unlock()
-		go func() {
-            iterate(num, iteration, spawn)
-            wg.Done()
-        }()
-	}
-
+	stones := make([]string, 0, len(s))
 	for _, input := range s {
 		if input == "\n" {
 			continue
 		}
 
+		stones = append(stones, input)
+	}
+
+	for i := 0; i < *routineStartDepth; i++ {
+		for x := 0; x < len(stones); x++ {
+			str := stones[x]
+			if str == "0" {
+				stones[x] = "1"
+				continue
+			}
+
+			strLen := utf8.RuneCountInString(str)
+			if strLen >= 2 && strLen%2 == 0 {
+				c := utf8.RuneCountInString(str) / 2
+				a, _ := strconv.Atoi(str[:c])
+				b, _ := strconv.Atoi(str[c:])
+
+				aS := strconv.Itoa(a)
+				bS := strconv.Itoa(b)
+
+				stones = slices.Insert(stones, x+1, bS)
+				stones[x] = aS
+
+				x++
+				continue
+			}
+
+			num, _ := strconv.Atoi(stones[x])
+			num *= 2024
+			stones[x] = strconv.Itoa(num)
+		}
+	}
+
+	count := 0
+	var wg sync.WaitGroup
+	var mtx sync.Mutex
+	sem := make(chan struct{}, *routineCount)
+
+	for _, input := range stones {
 		wg.Add(1)
-		count++
+		sem <- struct{}{}
+
 		go func() {
-			iterate(input, *iterations, spawn)
+			itCount := iterate(input, *iterations-*routineStartDepth)
+			mtx.Lock()
+			count += itCount
+			mtx.Unlock()
+			<-sem
 			wg.Done()
 		}()
 	}
@@ -58,10 +89,12 @@ func main() {
 	println(count)
 }
 
-func iterate(input string, count int, spawnNew func(string, int)) {
+func iterate(input string, loopDepth int) int {
 	str := input
 	num, _ := strconv.Atoi(str)
-	for i := 0; i < count; i++ {
+
+	count := 1
+	for i := 0; i < loopDepth; i++ {
 		if num == 0 {
 			num = 1
 			str = "1"
@@ -80,10 +113,12 @@ func iterate(input string, count int, spawnNew func(string, int)) {
 			num = a
 			str = aS
 
-			spawnNew(bS, count-i-1)
+			count += iterate(bS, loopDepth-i-1)
 			continue
 		}
 		num = num * 2024
 		str = strconv.Itoa(num)
 	}
+
+	return count
 }
