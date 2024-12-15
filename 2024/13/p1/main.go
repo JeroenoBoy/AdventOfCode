@@ -55,18 +55,16 @@ func main() {
 				Prize:   Vector{X: pX, Y: pY},
 			}
 
-			cost := clawMachine.CalculateCheapestOption(Vector{})
+			cost := clawMachine.CalculateCheapestOption()
+			println("finished", i, "out of", count, "with value", cost)
 			if cost == -1 {
 				return
 			}
 
 			mtx.Lock()
 			result += cost
-			println("finished", i, "out of", count)
 			mtx.Unlock()
 		}()
-
-		wg.Wait()
 	}
 
 	wg.Wait()
@@ -80,35 +78,51 @@ type ClawMachine struct {
 	Prize   Vector
 }
 
-func (m *ClawMachine) CalculateCheapestOption(currentPosition Vector) int {
-	if currentPosition.X > m.Prize.X || currentPosition.Y > m.Prize.Y {
+func (m *ClawMachine) CalculateCheapestOption() int {
+	costs := make(map[Vector]int)
+	costs[Vector{}] = 0
+
+	hasUnresolvedPositions := true
+	lowestCost := 999999999999999999
+	for hasUnresolvedPositions {
+		newCosts := make(map[Vector]int)
+
+		hasUnresolvedPositions = false
+		for position, value := range costs {
+			if position.X >= m.Prize.X || position.Y >= m.Prize.Y {
+				if value < lowestCost && position.X == m.Prize.X && position.Y == m.Prize.Y {
+					lowestCost = value
+				}
+				continue
+			}
+
+			hasUnresolvedPositions = true
+
+			newPosA := position.Add(m.ButtonA)
+			newPosB := position.Add(m.ButtonB)
+
+			if cost, ok := newCosts[newPosA]; !ok {
+				newCosts[newPosA] = value + COST_A
+			} else if value+COST_A < cost {
+				newCosts[newPosA] = value + COST_A
+			}
+
+			if cost, ok := newCosts[newPosB]; !ok {
+				newCosts[newPosB] = value + COST_B
+			} else if value+COST_A < cost {
+				newCosts[newPosB] = value + COST_B
+			}
+
+		}
+
+		costs = newCosts
+	}
+
+	if lowestCost == 999999999999999999 {
 		return -1
 	}
 
-	if currentPosition.X == m.Prize.X && currentPosition.Y == m.Prize.Y {
-		return 0
-	}
-
-	costB := m.CalculateCheapestOption(currentPosition.Add(m.ButtonB))
-	costA := m.CalculateCheapestOption(currentPosition.Add(m.ButtonA))
-
-	if costA == -1 {
-		if costB == -1 {
-			return -1
-		}
-		return costB + COST_B
-	} else if costB == -1 {
-		return costA + COST_A
-	}
-
-	costA += COST_A
-	costB += COST_B
-
-	if costA > costB {
-		return costB
-	}
-
-	return costA
+	return lowestCost
 }
 
 type Vector struct {
